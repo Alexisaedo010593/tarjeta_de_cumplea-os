@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Cumpleaños!</title>
+    <!-- Fuentes elegantes -->
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { 
+            width: 100%; height: 100%; 
+            overflow: hidden; 
+            font-family: 'Poppins', sans-serif;
+            background-color: #030313;
+        }
+
+        /* 🌌 INTRODUCCIÓN CON ESTRELLAS Y CONSTELACIONES */
+        #space-container {
+            position: fixed; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0a28 0%, #020208 100%);
+            z-index: 1;
+        }
+        .star {
+            position: absolute; background-color: white; border-radius: 50%;
+            animation: flicker infinite alternate;
+        }
+        @keyframes flicker { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        
+        canvas#fireworksCanvas {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            z-index: 2; pointer-events: none;
+        }
+
+        /* 💌 SOBRE ANIMADO */
+        .stage {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10; perspective: 1000px;
+        }
+        .envelope-wrapper {
+            position: relative; width: 300px; height: 200px;
+            background-color: #f1c40f; border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            cursor: pointer; transition: transform 0.5s;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .envelope-wrapper:hover { transform: translateY(-10px) rotate(1deg); }
+        .envelope-flap {
+            position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 150px solid transparent; border-right: 150px solid transparent;
+            border-top: 110px solid #d4ac0d; transform-origin: top;
+            transition: transform 0.4s ease-in-out; z-index: 4;
+        }
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg); z-index: 1;
+        }
+        .envelope-text {
+            color: #7f8c8d; font-weight: bold; font-size: 1.1rem; z-index: 3;
+            background: white; padding: 10px 20px; border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 📜 CARTA CON EFECTO MÁQUINA DE ESCRIBIR */
+        .card-container {
+            position: absolute; width: 90%; max-width: 500px;
+            background: rgba(255, 255, 255, 0.95); border-radius: 25px;
+            padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            text-align: center; z-index: 15;
+            display: none; transform: scale(0.5); opacity: 0;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 85vh; overflow-y: auto;
+        }
+        .card-container.active { display: block; transform: scale(1); opacity: 1; }
+        
+        .typewriter-text {
+            font-family: 'Courier Prime', monospace;
+            font-size: 1.05rem; color: #2c3e50; text-align: left;
+            line-height: 1.6; margin: 15px 0; min-height: 120px;
+            white-space: pre-wrap;
+        }
+
+        /* ELEMENTOS DEL MENÚ INTERNO (Pastel, Regalo, Oliver Tree) */
+        .asset-icon { font-size: 50px; margin: 10px; display: inline-block; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .oliver-zone {
+            background: #000; color: #00ffcc; padding: 15px; border-radius: 15px;
+            font-family: 'Courier Prime', monospace; margin-top: 15px; display: none;
+            border: 2px dashed #ff0055; text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #e74c3c, #ecf0f1);
+            color: #fff; background: #e74c3c; border: none;
+            padding: 12px 25px; border-radius: 25px; font-weight: bold;
+            cursor: pointer; margin-top: 15px; transition: 0.3s;
+        }
+        .btn:hover { transform: scale(1.05); background: #c0392b; }
+
+        /* 🎈 GLOBO / ❤️ CORAZÓN / 🎊 CONFETI ANIMACIONES */
+        .floating-element {
+            position: absolute; pointer-events: none; z-index: 5;
+            animation: floatUp linear forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) translateX(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-15vh) translateX(100px) scale(1.2); opacity: 0; }
+        }
+
+        /* 🌟 EASTER EGG */
+        .easter-egg-trigger {
+            position: fixed; bottom: 10px; right: 10px; width: 20px; height: 20px;
+            background: rgba(255,255,255,0.1); border-radius: 50%; cursor: pointer; z-index: 100;
+        }
+
+        /* 🌠 CONSTELACIONES FINAL */
+        .constellation-svg {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            pointer-events: none; opacity: 0; transition: opacity 3s ease-in-out; z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- REPRODUCTOR DE AUDIO (Mariachi en la nube) -->
+    <!-- Nota: Usa un enlace directo a un archivo de audio compatible (.mp3) -->
+    <audio id="mariachiAudio" loop>
+        <source src="mariachi.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Fondo de Espacio / Estrellas -->
+    <div id="space-container">
+        <!-- Constelaciones finales dibujadas mediante líneas SVG ocultas al inicio -->
+        <svg class="constellation-svg" id="constellations">
+            <polyline points="100,150 150,130 200,180 250,120" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none" />
+            <polyline points="500,400 580,350 620,420 700,380" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none" />
+            <circle cx="250" cy="120" r="4" fill="white" />
+            <circle cx="700" cy="380" r="4" fill="white" />
+        </svg>
+    </div>
+    
+    <!-- Canvas para los Fuegos Artificiales -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- Escenario Principal -->
+    <div class="stage">
+        
+        <!-- 💌 SOBRE VIRTUAL -->
+        <div class="envelope-wrapper" id="envelope" onclick="openEnvelope()">
+            <div class="envelope-flap"></div>
+            <div class="envelope-text">¡Toca para abrir! </div>
+        </div>
+
+        <!-- 📜 LA CARTA SÚPER INTERACTIVA -->
+        <div class="card-container" id="birthdayCard">
+            <div class="asset-icon">🎂</div>
+            <div class="asset-icon" id="giftBox" style="cursor:pointer;" onclick="openGift()">🎁</div>
+            
+            <h2 style="color: #e74c3c; font-weight: 800;">¡FELIZ CUMPLEAÑOS 🍻🍻🍻🍻!</h2>
+            
+            <!-- Contenedor efecto Máquina de escribir -->
+            <div class="typewriter-text" id="typewriter"></div>
+            
+            <!-- Zona Secreta de Oliver Tree -->
+            <div class="oliver-zone" id="oliverMessage">
+                <p>🧔🚀 SACA LAS CHELAS BIEN FRIAS CUÑADO Y CELEBRA CON LA FAMILIA</p> 
+                <p style="font-size: 1.2rem; margin-top:5px;">"¡Feliz cumpleaños Marco ; gracias por cuidar siempre de mi hermana y mis sobrinos !" 🍻🍻🍻🎉🎉🎉🥳🥳🥳</p>
+            </div>
+
+            <button class="btn" onclick="activarFuegosExplosion()">¡Lanzar Cohetes! 🎆</button>
+        </div>
+    </div>
+
+    <!-- 🌟 Easter Egg Escondido -->
+    <div class="easter-egg-trigger" onclick="activarSecretEgg()" title="¿Qué es esto?"></div>
+
+    <script>
+        // Generar Estrellas en la introducción galáctica
+        const space = document.getElementById('space-container');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.animationDuration = Math.random() * 2 + 1 + 's';
+            space.appendChild(star);
+        }
+
+        // Apertura del Sobre y Arranque del Sistema
+        function openEnvelope() {
+            const env = document.getElementById('envelope');
+            env.classList.add('open');
+            
+            // 🎵 Activar Música de Mariachi
+            const audio = document.getElementById('mariachiAudio');
+            audio.play().catch(e => console.log("Audio bloqueado por el navegador hasta interacción del usuario."));
+
+            setTimeout(() => {
+                env.style.display = 'none';
+                const card = document.getElementById('birthdayCard');
+                card.style.display = 'block';
+                setTimeout(() => {
+                    card.classList.add('active');
+                    startTypewriter(); // Iniciar máquina de escribir
+                    iniciarLluviaCelebracion(); // Globos, confeti, corazones
+                    loopFireworks(); // Iniciar fuegos artificiales
+                }, 50);
+            }, 600);
+        }
+
+        // 📜 Efecto Máquina de Escribir
+        const textoCarta = "Hola Marquiño,\n\nHoy el universo entero alinea sus estrellas para celebrar tu vida. Que la música de los mariachis alegre tu alma, que las risas sobren y que este año cumplas cada meta  que te propongas.\n\n¡Ábre el regalo de arriba🍻🍻🍻! 🎁";
+        let indexTexto = 0;
+        
+        function startTypewriter() {
+            if (indexTexto < textoCarta.length) {
+                document.getElementById('typewriter').innerHTML += textoCarta.charAt(indexTexto);
+                indexTexto++;
+                setTimeout(startTypewriter, 45);
+            }
+        }
+
+        // 🎁 Caja de Regalo e intervención de 🍻 Oliver Tree
+        function openGift() {
+            const gift = document.getElementById('giftBox');
+            gift.style.transform = "scale(1.5) rotate(360deg)";
+            gift.innerHTML = "🔓🍻";
+            
+            // Revelar mensaje de Oliver Tree
+            const oliverZone = document.getElementById('oliverMessage');
+            oliverZone.style.display = "block";
+            
+            // Lanzar ráfaga extra de confeti
+            for(let i=0; i<40; i++) spawnElement('🎊');
+        }
+
+        // Generador de Globos (🎈), Confeti (🎊) y Corazones (❤️)
+        function spawnElement(emoji) {
+            const el = document.createElement('div');
+            el.classList.add('floating-element');
+            el.innerText = emoji;
+            el.style.fontSize = Math.random() * 20 + 20 + 'px';
+            el.style.left = Math.random() * 95 + 'vw';
+            el.style.animationDuration = Math.random() * 3 + 4 + 's';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 7000);
+        }
+
+        function iniciarLluviaCelebracion() {
+            // Ciclo continuo de decoración flotante
+            setInterval(() => {
+                if (document.hidden) return;
+                const items = ['🎈', '❤️', '🎊', '✨', '🎈'];
+                spawnElement(items[Math.floor(Math.random() * items.length)]);
+            }, 300);
+        }
+
+        // 🎆 CANVAS DE FUEGOS ARTIFICIALES (Sistema de partículas avanzado)
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createFirework(x, y) {
+            const colors = ['#ff0055', '#00ffcc', '#ffcc00', '#ff00ff', '#00ff00', '#ffffff'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(i) * (Math.random() * 5 + 2),
+                    vy: Math.sin(i) * (Math.random() * 5 + 2),
+                    alpha: 1,
+                    color: color,
+                    gravity: 0.05
+                });
+            }
+        }
+
+        function activarFuegosExplosion() {
+            for(let i=0; i<5; i++) {
+                setTimeout(() => {
+                    createFirework(Math.random() * canvas.width, Math.random() * (canvas.height * 0.6));
+                }, i * 300);
+            }
+        }
+
+        function loopFireworks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Lanzamiento automático aleatorio intermitente
+            if (Math.random() < 0.02) {
+                createFirework(Math.random() * canvas.width, Math.random() * (canvas.height * 0.5));
+            }
+
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.alpha -= 0.015;
+
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (p.alpha <= 0) particles.splice(index, 1);
+            });
+
+            requestAnimationFrame(loopFireworks);
+        }
+
+        // 🌟 EASTER EGG SECRETO
+        function activarSecretEgg() {
+            alert("🛸 ¡ALERTA DE EASTER EGG GALÁCTICO! Los alienígenas aprueban este cumpleaños. 👽✨");
+            // Convierte el fondo temporalmente en una lluvia psicodélica
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => spawnElement('👽'), i * 50);
+            }
+        }
+
+        // 🌠 FINAL CON CONSTELACIONES (Aparecen sutilmente tras unos segundos)
+        setTimeout(() => {
+            document.getElementById('constellations').style.opacity = '1';
+        }, 12000); // Aparecen tras 12 segundos de fiesta
+    </script>
+</body>
+</html>
